@@ -61,51 +61,76 @@ def unitary_operator(time):
 
 init_state = kron(Cs[0], Ps[0])
 
-def get_quantum_walk_state(time):
+def get_quantum_walk_state(time, init_state):
+
+    init = init_state
 
     t = time
     U = unitary_operator(t)
-    qw_state = matmul(U, init_state)
+    qw_state = matmul(U, init)
 
     return qw_state
 
 
+def get_prob_i(time, init_state):
 
-qw_state = get_quantum_walk_state(10)
+    init = init_state
 
-pi_all = []
-for coeff in qw_state:
+    t = time
+    pi_all = []
 
-    # u_temp = format(float(u**2), 'f')
-    prob_tmp = np.around(coeff**2, decimals = 3)
+    qw_state = get_quantum_walk_state(t, init)
 
-    pi_all.append(prob_tmp)
-    # print(u_temp)
+    for coeff in qw_state:
 
-# print(P)
-m = len(pi_all)
-P_i = []
-for k in range(0, m, 5):
-    # print(k)
-    temp = []
-    for l in range(N):
-        # print(P[l+k])
-        temp.append(pi_all[l+k])
-    P_i.append(temp)
+        prob_tmp = np.around(coeff**2, decimals = 3)
+        pi_all.append(prob_tmp)
 
-    # print(temp)
-    # print('')
+    m = len(pi_all)
+    P_i = []
+    for k in range(0, m, 5):
+        temp = []
+        for l in range(N):
+            temp.append(pi_all[l+k])
+        P_i.append(temp)
 
-# print(add(P_i[0], P_i[1]))
+    P_temp = P_i[0]
+    for p in range(1, len(P_i)):
+        P_temp = add(P_temp, P_i[p])
 
-P_temp = P_i[0]
-for p in range(1, len(P_i)):
-    P_temp = add(P_temp, P_i[p])
+    return P_temp
 
-P = []
 
-print('sum of p_i: ', sum(P_temp))
-P.append(P_temp)
-P = vec(P)
+t = 400
+def get_transition_matrix(time):
+
+    P = []
+    t = time
+
+    for i in range(N):
+        # print(i)
+        init_qw = kron(Cs[0], Ps[i])
+
+        P_i = get_prob_i(t, init_qw)
+
+        P.append(P_i)
+
+    P = vec(P)
+
+    return P
+
+P = get_transition_matrix(t)
+
+for pi in P:
+    print('sum of p_i: ', sum(pi))
+
 print('transition matrix P:')
 print(P)
+#
+# P_i = get_prob_i(t, init_state)
+# P = []
+# print('sum of p_i: ', sum(P_i))
+# P.append(P_i)
+# P = vec(P)
+# print('transition matrix P:')
+# print(P)
