@@ -14,7 +14,9 @@ from numpy.linalg import inv
 from numpy.linalg import norm
 from numpy import array as vec
 from numpy import eye as id
-
+import heatmaps as ht
+import matplotlib
+import matplotlib.pyplot as plt
 
 # Hadamard operator:
 Hm = (1/sqrt(2))*vec([[1, 1],[1, -1]])
@@ -58,9 +60,6 @@ def unitary_operator(time):
             U_t = matmul(U_t,U)
         return U_t
 
-
-init_state = kron(Cs[0], Ps[0])
-
 def get_quantum_walk_state(time, init_state):
 
     init = init_state
@@ -101,7 +100,6 @@ def get_prob_i(time, init_state):
     return P_temp
 
 
-t = 400
 def get_transition_matrix(time):
 
     P = []
@@ -119,18 +117,32 @@ def get_transition_matrix(time):
 
     return P
 
-P = get_transition_matrix(t)
 
-for pi in P:
-    print('sum of p_i: ', sum(pi))
+def main(time):
 
-print('transition matrix P:')
-print(P)
-#
-# P_i = get_prob_i(t, init_state)
-# P = []
-# print('sum of p_i: ', sum(P_i))
-# P.append(P_i)
-# P = vec(P)
-# print('transition matrix P:')
-# print(P)
+    t = time
+    P = get_transition_matrix(t)
+
+    for pi in P:
+        print('sum of p_i: ', sum(pi))
+
+    print('transition matrix P:')
+    print(P)
+
+    vectices = ["1", "2", "3", "4","5"]
+
+    fig, ax = plt.subplots()
+
+    im, cbar = ht.heatmap(P, vectices, vectices, ax=ax,cmap="YlGn", cbarlabel="probability")
+    texts = ht.annotate_heatmap(im, valfmt="{x:.3f}")
+
+    # plt.title('P, %d' %t)
+
+    fig.tight_layout()
+
+    plt.show()
+
+if __name__ == '__main__':
+
+    t = 1000
+    main(t)
